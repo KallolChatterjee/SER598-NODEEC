@@ -10,28 +10,73 @@ function display(lumberDisplay) {
     console.log(lumberDisplay);
 }
 lumberjack.on('lumberjack', display);
+calculator.on('calculator', findTotal);
 
+function writeData(sock, clientId, message) {
+  sock.write(message, function() {
+    console.log("Message for client '", clientId, "': ", message);
+    console.log("Finished response to client");
+  });
+}
 
 
 function checkClient(clientId,cmd, value, sock){
   console.log('ClientID : ' + clientId);
   if (clientId === "ASU") {
     setTimeout(function () {
-	findTotal(cmd, value, sock, clientId);
+	  calculator.emit('calculator', cmd, value, sock, clientId);
     }, 30000);
   } else if (clientId === "UA") {
     setImmediate(function(){
-	findTotal(cmd, value, sock, clientId);
+	  calculator.emit('calculator', cmd, value, sock, clientId);
     });
 
   } else if (clientId === "NAU") {
     lumberjack.emit('lumberjack', 'I saw a lumberjack!');
-	findTotal(cmd, value, sock, clientId);
+	  calculator.emit('calculator', cmd, value, sock, clientId);
   }
 }
 
 function findTotal(cmd,value,sock,clientId){
+  if (clients[clientId] === undefined) {
+    clients[clientId] = 0;
+  }
 
+  if (cmd === "q") {
+      console.log("Available data as of now : ");
+      for (key in clients) {
+        console.log(key, clients[key]);
+      }
+      console.log('Connection closed by Client');
+      sock.end("Good Bye !!! \n");
+      server.close();
+      return;
+  } else {
+
+    var total = clients[clientId];
+
+    if (!value.match(/^\d+$/)) {
+      writeData(sock, clientId, 'Invalid request specification');
+      return;
+    }
+
+    value = parseInt(value, 10);
+
+    if (cmd === "a") {
+        total += value;
+    } else if (cmd === "m") {
+        total -= value;
+    } else if (cmd === "s") {
+        total = value;
+    } else{
+        writeData(sock, clientId, 'Invalid request specification');
+        return;
+    }
+
+    clients[clientId] = total;
+
+    writeData(sock, clientId, total.toString());
+  }
 }
 
 var server = net.createServer(function (sock) {
