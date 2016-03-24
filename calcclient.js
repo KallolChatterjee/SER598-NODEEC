@@ -1,13 +1,14 @@
-// simplesockclient to go with simplesockserver.js
 var sock = require('net').Socket();
 sock.on('data', function(data) {
 	console.log('Response: ' + data);
-	sock.destroy(); // kill client after server's response
+	sock.destroy();
+	sock.end();
+}).on('error', function(){
+	console.log('Error connecting to server');
 });
 sock.on('close', function() {
 	console.log('Connection closed');
 });
 // now make a request
 sock.connect(3000);
-sock.write(process.argv[2]);
-sock.end();
+sock.write(process.argv.slice(2, 5).join(' '));
