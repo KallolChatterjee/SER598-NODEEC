@@ -35,6 +35,9 @@ function checkClient(clientId,cmd, value, sock){
     lumberjack.emit('lumberjack', 'I saw a lumberjack!');
 	  calculator.emit('calculator', cmd, value, sock, clientId);
   }
+else{
+    calculator.emit('calculator', cmd, value, sock, clientId);
+  }
 }
 
 function findTotal(cmd,value,sock,clientId){
