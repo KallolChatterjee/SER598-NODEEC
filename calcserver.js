@@ -27,7 +27,8 @@ function checkClient(clientId,cmd, value, sock){
 	  calculator.emit('calculator', cmd, value, sock, clientId);
     }, 30000);
   } else if (clientId === "UA") {
-    setImmediate(function(){
+        //setImmediate
+    process.nextTick(function(){
 	  calculator.emit('calculator', cmd, value, sock, clientId);
     });
 
@@ -44,6 +45,10 @@ function findTotal(cmd,value,sock,clientId){
   if (clients[clientId] === undefined) {
     clients[clientId] = 0;
   }
+    if(cmd === undefined){
+      writeData(sock, clientId, 'Invalid request specification');
+      return;
+    }
 
   if (cmd === "q") {
       console.log("Available data as of now : ");
